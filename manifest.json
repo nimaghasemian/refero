@@ -1,9 +1,10 @@
 {
   "id": "refero",
-  "name": "Reference Automator",
-  "version": "0.1.0",
+  "name": "Refero",
+  "version": "1.0.0",
   "minAppVersion": "0.12.0",
-  "description": "Quick-add references with status, type & tags",
-  "author": "nimic - mirnimaghasemian@proton.me",
+  "description": "Add and track references with type, status, and star rating — works for both internal notes and external sources.",
+  "author": "nimic <mirnimaghasemian@proton.me>",
+  "authorUrl": "https://github.com/nimaghasemian/refero",
   "main": "main.js"       
 }
