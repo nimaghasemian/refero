@@ -398,6 +398,32 @@
   margin-left: 4px;
 }
 
+/* ── Status guide modal ───────────────────────────────────────────────────── */
+
+.refero-status-guide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.refero-status-guide-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.refero-status-guide-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.refero-status-guide-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 /* ── Broken refs modal ────────────────────────────────────────────────────── */
 
 .refero-broken-list {

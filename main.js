@@ -440,11 +440,8 @@ class ReferenceModal extends obsidian_1.Modal {
         const statusWrapper = contentEl.createDiv('refero-field-wrapper');
         const statusLabel = statusWrapper.createEl('label', { cls: 'refero-label' });
         statusLabel.createSpan({ text: 'Status' });
-        statusLabel.createEl('a', {
-            text: '?',
-            href: 'obsidian://open?vault=Obsidian%20Vault&file=Refrencer%2FReference%20Status%20Guide',
-            cls: 'refero-label-hint',
-        });
+        const statusHint = statusLabel.createEl('a', { text: '?', cls: 'refero-label-hint' });
+        statusHint.onclick = (e) => { e.preventDefault(); new StatusGuideModal(this.app).open(); };
         this.statusSelect = statusWrapper.createEl('select', { cls: 'refero-select' });
         STATUS_ORDER.forEach(s => this.statusSelect.createEl('option', { text: `${s.icon} ${s.label}`, value: s.key }));
         this.statusSelect.addEventListener('keydown', (e) => {
@@ -831,6 +828,32 @@ class ReferenceModal extends obsidian_1.Modal {
         }
         new obsidian_1.Notice('Reference updated.');
     }
+}
+// ── Status Guide Modal ────────────────────────────────────────────────────────
+const STATUS_DESCRIPTIONS = {
+    'saved': 'You\'ve saved this for later but haven\'t looked at it yet.',
+    'skimmed': 'You\'ve glanced at it and have a rough sense of the content.',
+    'in-progress': 'You\'re actively reading, watching, or working through it.',
+    'to-review': 'You\'ve gone through it but want to revisit before considering it done.',
+    'completed': 'You\'ve fully consumed it and extracted what you needed.',
+    'needs-review': 'Something about it needs attention — unclear notes, conflicting info, etc.',
+    'abandoned': 'You\'ve decided not to continue with it.',
+};
+class StatusGuideModal extends obsidian_1.Modal {
+    onOpen() {
+        const { contentEl } = this;
+        this.modalEl.addClass('refero-modal-el');
+        contentEl.addClass('refero-modal');
+        contentEl.createEl('h2', { text: 'Reference Statuses', cls: 'refero-modal-header' });
+        const list = contentEl.createDiv('refero-status-guide-list');
+        STATUS_ORDER.forEach(s => {
+            var _a;
+            const row = list.createDiv('refero-status-guide-row');
+            row.createSpan({ text: `${s.icon}  ${s.label}`, cls: 'refero-status-guide-name' });
+            row.createSpan({ text: (_a = STATUS_DESCRIPTIONS[s.key]) !== null && _a !== void 0 ? _a : '', cls: 'refero-status-guide-desc' });
+        });
+    }
+    onClose() { this.contentEl.empty(); }
 }
 // ── Tag Browser Modal ─────────────────────────────────────────────────────────
 class TagBrowserModal extends obsidian_1.Modal {
