@@ -1,8 +1,12 @@
-/* === Refero Plugin — all selectors scoped to .refero-modal === */
+/* === Refero Plugin === */
+
+/* Size the dialog box itself so centering is handled by Obsidian's layout */
+.refero-modal-el {
+  width: 520px;
+  max-width: 92vw;
+}
 
 .refero-modal {
-  width: 480px;
-  max-width: 92vw;
   padding: 4px 0 8px;
 }
 
@@ -195,4 +199,211 @@
   border-top: 1px solid var(--background-modifier-border);
   display: flex;
   justify-content: flex-end;
+}
+
+/* ── Date info (edit mode) ────────────────────────────────────────────────── */
+
+.refero-date-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.refero-date-chip {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--background-secondary);
+  border-radius: 10px;
+  padding: 2px 8px;
+  user-select: none;
+}
+
+/* ── Tag browser ──────────────────────────────────────────────────────────── */
+
+.refero-muted {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.refero-tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.refero-tag-chip {
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 3px 10px;
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+  transition: background 0.1s ease, color 0.1s ease;
+  user-select: none;
+}
+
+.refero-tag-chip:hover {
+  background: var(--background-modifier-hover);
+}
+
+.refero-tag-chip--active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+.refero-tag-results {
+  max-height: 280px;
+  overflow-y: auto;
+  border-radius: 6px;
+  border: 1px solid var(--background-modifier-border);
+}
+
+/* ── Reference Map View ───────────────────────────────────────────────────── */
+
+.refero-map-view {
+  padding: 12px 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.refero-map-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding-bottom: 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.refero-map-select,
+.refero-map-input {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-family: var(--font-text);
+  color: var(--text-normal);
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 5px;
+  outline: none;
+}
+
+.refero-map-input[type="date"] { width: 130px; }
+.refero-map-input[type="text"] { width: 110px; }
+
+.refero-map-select:focus,
+.refero-map-input:focus {
+  border-color: var(--interactive-accent);
+}
+
+.refero-map-btn {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 14px;
+  cursor: pointer;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 5px;
+  color: var(--text-normal);
+  line-height: 1;
+}
+
+.refero-map-btn:hover { background: var(--background-modifier-hover); }
+
+.refero-map-stats {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.refero-map-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.refero-map-card {
+  padding: 8px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+}
+
+.refero-map-card:hover { background: var(--background-modifier-hover); }
+
+.refero-map-card--broken {
+  border-color: var(--color-red, #e06c75);
+  opacity: 0.85;
+}
+
+.refero-map-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.refero-map-type-icon { font-size: 15px; flex-shrink: 0; }
+
+.refero-map-card-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 0;
+}
+
+.refero-map-card-title a {
+  color: var(--text-accent);
+  text-decoration: none;
+}
+
+.refero-map-card-title a:hover { text-decoration: underline; }
+
+.refero-map-status { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+.refero-map-stars {
+  font-size: 12px;
+  color: #f5c400;
+  white-space: nowrap;
+  letter-spacing: 1px;
+}
+
+.refero-map-card-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.refero-map-card-source {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: 3px;
+}
+
+.refero-map-card-source a { color: var(--text-faint); text-decoration: underline; }
+.refero-map-card-source a:hover { color: var(--text-accent); }
+
+.refero-broken-badge {
+  font-size: 11px;
+  color: var(--color-red, #e06c75);
+  margin-left: 4px;
+}
+
+/* ── Broken refs modal ────────────────────────────────────────────────────── */
+
+.refero-broken-list {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  margin-top: 8px;
 }

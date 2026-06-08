@@ -1,9 +1,9 @@
 {
   "id": "refero",
   "name": "Refero",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "minAppVersion": "0.12.0",
-  "description": "Add and track references with type, status, and star rating — works for both internal notes and external sources.",
+  "description": "Capture and organize references with types, statuses, tags, ratings, and a vault-wide reference map.",
   "author": "nimic <mirnimaghasemian@proton.me>",
   "authorUrl": "https://github.com/nimaghasemian/refero",
   "main": "main.js"       
