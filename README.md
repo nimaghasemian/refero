@@ -1,6 +1,7 @@
 # Refero
 
 An Obsidian plugin for capturing and organizing references directly inside your notes. Assign a type, status, tags, and star rating to every reference — whether it's an internal note, a web page, a video, a paper, or anything else. Browse and audit references vault-wide from a dedicated map view.
+
 <img width="800" height="450" alt="refero" src="https://github.com/user-attachments/assets/78c4d3f6-d10a-4ff8-a395-af6fb305ba82" />
 
 ## Features
