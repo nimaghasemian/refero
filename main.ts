@@ -170,7 +170,7 @@ export default class ReferenceAutomatorPlugin extends Plugin {
 
     this.addCommand({
       id: 'add-reference',
-      name: 'Add Reference to Note',
+      name: 'Add reference to note',
       editorCallback: (editor, ctx) => {
         if (!(ctx instanceof MarkdownView)) {
           new Notice('⛔️ Run this command in a Markdown note.');
@@ -182,7 +182,7 @@ export default class ReferenceAutomatorPlugin extends Plugin {
 
     this.addCommand({
       id: 'edit-reference',
-      name: 'Edit Reference Under Cursor',
+      name: 'Edit reference under cursor',
       editorCallback: (editor, ctx) => {
         if (!(ctx instanceof MarkdownView)) {
           new Notice('⛔️ Run this in a Markdown note.');
@@ -204,7 +204,7 @@ export default class ReferenceAutomatorPlugin extends Plugin {
 
     this.addCommand({
       id: 'open-reference-url',
-      name: 'Open Reference URL in Browser',
+      name: 'Open reference URL in browser',
       editorCallback: (editor, ctx) => {
         if (!(ctx instanceof MarkdownView)) {
           new Notice('⛔️ Run this in a Markdown note.');
@@ -228,7 +228,7 @@ export default class ReferenceAutomatorPlugin extends Plugin {
 
     this.addCommand({
       id: 'delete-reference',
-      name: 'Delete Reference Under Cursor',
+      name: 'Delete reference under cursor',
       editorCallback: (editor, ctx) => {
         if (!(ctx instanceof MarkdownView)) {
           new Notice('⛔️ Run this in a Markdown note.');
@@ -249,7 +249,7 @@ export default class ReferenceAutomatorPlugin extends Plugin {
 
     this.addCommand({
       id: 'cycle-ref-status',
-      name: 'Cycle Reference Status',
+      name: 'Cycle reference status',
       editorCallback: (editor, ctx) => {
         if (!(ctx instanceof MarkdownView)) {
           new Notice('⛔️ Run this in a Markdown note.');
@@ -280,19 +280,19 @@ export default class ReferenceAutomatorPlugin extends Plugin {
 
     this.addCommand({
       id: 'browse-references-by-tag',
-      name: 'Browse References by Tag',
+      name: 'Browse references by tag',
       callback: () => new TagBrowserModal(this.app).open(),
     });
 
     this.addCommand({
       id: 'open-reference-map',
-      name: 'Open Reference Map',
+      name: 'Open reference map',
       callback: () => this.openReferenceMap(),
     });
 
     this.addCommand({
       id: 'find-broken-references',
-      name: 'Find Broken References',
+      name: 'Find broken references',
       callback: () => new BrokenRefsModal(this.app).open(),
     });
 
@@ -724,7 +724,7 @@ class ReferenceModal extends Modal {
   }
 
   private renderSuggestions(files: TFile[], container: HTMLElement) {
-    container.innerHTML = '';
+    container.empty();
     if (files.length === 0) { container.style.display = 'none'; return; }
     files.forEach(file => {
       const item = container.createDiv('refero-suggestion-item');

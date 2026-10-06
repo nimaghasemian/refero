@@ -139,7 +139,7 @@ class ReferenceAutomatorPlugin extends obsidian_1.Plugin {
         this.registerView(VIEW_TYPE_REFERO_MAP, leaf => new RefMapView(leaf));
         this.addCommand({
             id: 'add-reference',
-            name: 'Add Reference to Note',
+            name: 'Add reference to note',
             editorCallback: (editor, ctx) => {
                 if (!(ctx instanceof obsidian_1.MarkdownView)) {
                     new obsidian_1.Notice('⛔️ Run this command in a Markdown note.');
@@ -150,7 +150,7 @@ class ReferenceAutomatorPlugin extends obsidian_1.Plugin {
         });
         this.addCommand({
             id: 'edit-reference',
-            name: 'Edit Reference Under Cursor',
+            name: 'Edit reference under cursor',
             editorCallback: (editor, ctx) => {
                 var _a;
                 if (!(ctx instanceof obsidian_1.MarkdownView)) {
@@ -175,7 +175,7 @@ class ReferenceAutomatorPlugin extends obsidian_1.Plugin {
         });
         this.addCommand({
             id: 'open-reference-url',
-            name: 'Open Reference URL in Browser',
+            name: 'Open reference URL in browser',
             editorCallback: (editor, ctx) => {
                 if (!(ctx instanceof obsidian_1.MarkdownView)) {
                     new obsidian_1.Notice('⛔️ Run this in a Markdown note.');
@@ -204,7 +204,7 @@ class ReferenceAutomatorPlugin extends obsidian_1.Plugin {
         });
         this.addCommand({
             id: 'delete-reference',
-            name: 'Delete Reference Under Cursor',
+            name: 'Delete reference under cursor',
             editorCallback: (editor, ctx) => {
                 if (!(ctx instanceof obsidian_1.MarkdownView)) {
                     new obsidian_1.Notice('⛔️ Run this in a Markdown note.');
@@ -224,7 +224,7 @@ class ReferenceAutomatorPlugin extends obsidian_1.Plugin {
         });
         this.addCommand({
             id: 'cycle-ref-status',
-            name: 'Cycle Reference Status',
+            name: 'Cycle reference status',
             editorCallback: (editor, ctx) => {
                 var _a;
                 if (!(ctx instanceof obsidian_1.MarkdownView)) {
@@ -258,17 +258,17 @@ class ReferenceAutomatorPlugin extends obsidian_1.Plugin {
         });
         this.addCommand({
             id: 'browse-references-by-tag',
-            name: 'Browse References by Tag',
+            name: 'Browse references by tag',
             callback: () => new TagBrowserModal(this.app).open(),
         });
         this.addCommand({
             id: 'open-reference-map',
-            name: 'Open Reference Map',
+            name: 'Open reference map',
             callback: () => this.openReferenceMap(),
         });
         this.addCommand({
             id: 'find-broken-references',
-            name: 'Find Broken References',
+            name: 'Find broken references',
             callback: () => new BrokenRefsModal(this.app).open(),
         });
         this.registerEvent(this.app.vault.on('rename', (file, oldPath) => {
@@ -722,7 +722,7 @@ class ReferenceModal extends obsidian_1.Modal {
         this.renderSuggestions(this.getMatchingSuggestions(this.titleInput.value.trim()), this.titleSuggestionsContainer);
     }
     renderSuggestions(files, container) {
-        container.innerHTML = '';
+        container.empty();
         if (files.length === 0) {
             container.style.display = 'none';
             return;
