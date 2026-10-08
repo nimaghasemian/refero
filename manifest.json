@@ -1,7 +1,7 @@
 {
   "id": "refero",
   "name": "Refero",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "minAppVersion": "1.0.0",
   "description": "Capture and organize references with types, statuses, tags, ratings, and a vault-wide reference map.",
   "author": "nimic",

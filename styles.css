@@ -117,6 +117,14 @@
   box-shadow: var(--shadow-s);
 }
 
+.refero-suggestions.is-open {
+  display: block;
+}
+
+.refero-field-wrapper.refero-hidden {
+  display: none;
+}
+
 .refero-suggestion-item {
   padding: 7px 12px;
   cursor: pointer;

@@ -274,14 +274,14 @@ class ReferenceAutomatorPlugin extends obsidian_1.Plugin {
         this.registerEvent(this.app.vault.on('rename', (file, oldPath) => {
             if (!(file instanceof obsidian_1.TFile) || !file.path.endsWith('.md'))
                 return;
-            this.handleNoteRename(oldPath, file.path);
+            void this.handleNoteRename(oldPath, file.path);
         }));
     }
     openReferenceMap() {
         return __awaiter(this, void 0, void 0, function* () {
             const existing = this.app.workspace.getLeavesOfType(VIEW_TYPE_REFERO_MAP);
             if (existing.length > 0) {
-                this.app.workspace.revealLeaf(existing[0]);
+                this.app.workspace.setActiveLeaf(existing[0], { focus: true });
                 return;
             }
             yield this.app.workspace.getLeaf(true).setViewState({
@@ -296,16 +296,16 @@ class ReferenceAutomatorPlugin extends obsidian_1.Plugin {
             const newBase = newPath.replace(/\.md$/, '');
             let count = 0;
             for (const file of this.app.vault.getMarkdownFiles()) {
-                const content = yield this.app.vault.read(file);
+                const content = yield this.app.vault.cachedRead(file);
                 // wiki-link: ### [[oldBase]] or ### [[oldBase|alias]]
                 const wikiRe = new RegExp(`(^###[ \\t]+\\[\\[)${escapeRegex(oldBase)}(\\|[^\\]]*)?\\]\\]`, 'gm');
                 // markdown link: ### [title](oldPath)
                 const mdRe = new RegExp(`(^###[ \\t]+\\[[^\\]]*\\]\\()${escapeRegex(oldPath)}\\)`, 'gm');
-                const updated = content
+                const rewrite = (text) => text
                     .replace(wikiRe, (_, pre, alias) => `${pre}${newBase}${alias !== null && alias !== void 0 ? alias : ''}]]`)
                     .replace(mdRe, `$1${newPath})`);
-                if (updated !== content) {
-                    yield this.app.vault.modify(file, updated);
+                if (rewrite(content) !== content) {
+                    yield this.app.vault.process(file, rewrite);
                     count++;
                 }
             }
@@ -349,15 +349,10 @@ class ReferenceModal extends obsidian_1.Modal {
         typeWrapper.createEl('label', { text: 'Type', cls: 'refero-label' });
         this.typeSelect = typeWrapper.createEl('select', { cls: 'refero-select' });
         TYPE_GROUPS.forEach(group => {
-            const og = document.createElement('optgroup');
-            og.label = group.label;
+            const og = this.typeSelect.createEl('optgroup', { attr: { label: group.label } });
             group.types.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t.key;
-                opt.textContent = `${t.icon} ${t.label}`;
-                og.appendChild(opt);
+                og.createEl('option', { value: t.key, text: `${t.icon} ${t.label}` });
             });
-            this.typeSelect.appendChild(og);
         });
         this.typeSelect.onchange = () => this.onTypeChange();
         this.typeSelect.addEventListener('keydown', (e) => {
@@ -403,10 +398,10 @@ class ReferenceModal extends obsidian_1.Modal {
             this.showTitleSuggestions(); };
         this.titleInput.onfocus = () => { if (this.typeSelect.value === 'plain-note')
             this.showTitleSuggestions(); };
-        this.titleInput.onblur = () => setTimeout(() => this.hideTitleSuggestions(), 200);
+        this.titleInput.onblur = () => window.setTimeout(() => this.hideTitleSuggestions(), 200);
         this.titleInput.addEventListener('keydown', (e) => {
             var _a;
-            const open = this.titleSuggestionsContainer.style.display !== 'none';
+            const open = this.titleSuggestionsContainer.hasClass('is-open');
             if (e.key === 'ArrowDown' && open) {
                 e.preventDefault();
                 const items = this.titleSuggestionsContainer.querySelectorAll('.refero-suggestion-item');
@@ -516,9 +511,9 @@ class ReferenceModal extends obsidian_1.Modal {
         else {
             this.typeSelect.value = 'plain-note';
             this.onTypeChange();
-            this.tryPrefillFromClipboard();
+            void this.tryPrefillFromClipboard();
         }
-        setTimeout(() => (this.editLine != null ? this.titleInput : this.typeSelect).focus(), 50);
+        window.setTimeout(() => (this.editLine != null ? this.titleInput : this.typeSelect).focus(), 50);
         this.clickHandler = (e) => {
             if (!this.urlInput.contains(e.target) && !this.suggestionsContainer.contains(e.target))
                 this.hideSuggestions();
@@ -567,7 +562,7 @@ class ReferenceModal extends obsidian_1.Modal {
         this.hideSuggestions();
         this.hideTitleSuggestions();
         const isNote = this.typeSelect.value === 'plain-note';
-        this.urlWrapper.style.display = isNote ? 'none' : '';
+        this.urlWrapper.toggleClass('refero-hidden', isNote);
         if (isNote) {
             this.titleInput.placeholder = '📎 Start typing a note name…';
         }
@@ -630,7 +625,7 @@ class ReferenceModal extends obsidian_1.Modal {
                 if (text && /^https?:\/\//.test(text.trim()) && !this.urlInput.value.trim() && !this.titleInput.value.trim()) {
                     this.urlInput.value = text.trim();
                     this.detectTypeFromUrl();
-                    this.urlWrapper.style.display = '';
+                    this.urlWrapper.removeClass('refero-hidden');
                 }
             }
             catch ( /* clipboard access denied */_a) { /* clipboard access denied */ }
@@ -724,7 +719,7 @@ class ReferenceModal extends obsidian_1.Modal {
     renderSuggestions(files, container) {
         container.empty();
         if (files.length === 0) {
-            container.style.display = 'none';
+            container.removeClass('is-open');
             return;
         }
         files.forEach(file => {
@@ -734,11 +729,11 @@ class ReferenceModal extends obsidian_1.Modal {
             item.onclick = () => {
                 this.titleInput.value = file.basename;
                 this.urlInput.value = file.path;
-                container.style.display = 'none';
+                container.removeClass('is-open');
                 this.suggestionIndex = -1;
             };
         });
-        container.style.display = 'block';
+        container.addClass('is-open');
     }
     highlightSuggestion(items) {
         items.forEach((item, i) => {
@@ -750,8 +745,8 @@ class ReferenceModal extends obsidian_1.Modal {
                 item.removeClass('refero-suggestion-item--active');
         });
     }
-    hideSuggestions() { this.suggestionsContainer.style.display = 'none'; }
-    hideTitleSuggestions() { this.titleSuggestionsContainer.style.display = 'none'; this.suggestionIndex = -1; }
+    hideSuggestions() { this.suggestionsContainer.removeClass('is-open'); }
+    hideTitleSuggestions() { this.titleSuggestionsContainer.removeClass('is-open'); this.suggestionIndex = -1; }
     // ── Star rating ───────────────────────────────────────────────────────────
     updateStarDisplay(hoverRating) {
         const r = hoverRating !== undefined ? hoverRating : this.currentRating;
@@ -844,7 +839,7 @@ class StatusGuideModal extends obsidian_1.Modal {
         const { contentEl } = this;
         this.modalEl.addClass('refero-modal-el');
         contentEl.addClass('refero-modal');
-        contentEl.createEl('h2', { text: 'Reference Statuses', cls: 'refero-modal-header' });
+        contentEl.createEl('h2', { text: 'Reference statuses', cls: 'refero-modal-header' });
         const list = contentEl.createDiv('refero-status-guide-list');
         STATUS_ORDER.forEach(s => {
             var _a;
@@ -861,9 +856,9 @@ class TagBrowserModal extends obsidian_1.Modal {
         const { contentEl } = this;
         this.modalEl.addClass('refero-modal-el');
         contentEl.addClass('refero-modal');
-        contentEl.createEl('h2', { text: 'Browse by Tag', cls: 'refero-modal-header' });
+        contentEl.createEl('h2', { text: 'Browse by tag', cls: 'refero-modal-header' });
         const loadingEl = contentEl.createEl('p', { text: 'Scanning vault…', cls: 'refero-muted' });
-        parseVaultRefs(this.app).then(refs => {
+        void parseVaultRefs(this.app).then(refs => {
             loadingEl.remove();
             const tagMap = new Map();
             refs.forEach(r => r.tags.forEach(t => {
@@ -895,7 +890,7 @@ class TagBrowserModal extends obsidian_1.Modal {
             item.createDiv({ text: ref.title, cls: 'refero-suggestion-name' });
             item.createDiv({ text: ref.sourceFile.path, cls: 'refero-suggestion-path' });
             item.onclick = () => {
-                this.app.workspace.openLinkText(ref.sourceFile.basename, '', false);
+                void this.app.workspace.openLinkText(ref.sourceFile.basename, '', false);
                 this.close();
             };
         });
@@ -911,7 +906,7 @@ class RefMapView extends obsidian_1.ItemView {
         this.sortDir = 'desc';
     }
     getViewType() { return VIEW_TYPE_REFERO_MAP; }
-    getDisplayText() { return 'Reference Map'; }
+    getDisplayText() { return 'Reference map'; }
     getIcon() { return 'layout-list'; }
     onOpen() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -932,12 +927,12 @@ class RefMapView extends obsidian_1.ItemView {
         const bar = this.filterBarEl;
         bar.empty();
         const typeSelect = bar.createEl('select', { cls: 'refero-map-select' });
-        typeSelect.createEl('option', { text: 'All Types', value: '' });
+        typeSelect.createEl('option', { text: 'All types', value: '' });
         TYPE_OPTIONS.forEach(t => typeSelect.createEl('option', { text: `${t.icon} ${t.label}`, value: t.key }));
         typeSelect.value = this.filters.type;
         typeSelect.onchange = () => { this.filters.type = typeSelect.value; this.render(); };
         const statusSelect = bar.createEl('select', { cls: 'refero-map-select' });
-        statusSelect.createEl('option', { text: 'All Statuses', value: '' });
+        statusSelect.createEl('option', { text: 'All statuses', value: '' });
         STATUS_ORDER.forEach(s => statusSelect.createEl('option', { text: `${s.icon} ${s.label}`, value: s.key }));
         statusSelect.value = this.filters.status;
         statusSelect.onchange = () => { this.filters.status = statusSelect.value; this.render(); };
@@ -1050,7 +1045,7 @@ class RefMapView extends obsidian_1.ItemView {
             }
             else if (ref.type === 'plain-note' && ref.url) {
                 const a = titleEl.createEl('a', { text: ref.title, href: '#' });
-                a.onclick = (e) => { e.preventDefault(); this.app.workspace.openLinkText(ref.title, ref.sourceFile.path, false); };
+                a.onclick = (e) => { e.preventDefault(); void this.app.workspace.openLinkText(ref.title, ref.sourceFile.path, false); };
             }
             else if (ref.url) {
                 const a = titleEl.createEl('a', { text: ref.title, href: ref.url });
@@ -1074,7 +1069,7 @@ class RefMapView extends obsidian_1.ItemView {
             const sourceEl = card.createDiv('refero-map-card-source');
             sourceEl.createSpan({ text: 'in ' });
             const nl = sourceEl.createEl('a', { text: ref.sourceFile.basename, href: '#' });
-            nl.onclick = (e) => { e.preventDefault(); this.app.workspace.openLinkText(ref.sourceFile.basename, '', false); };
+            nl.onclick = (e) => { e.preventDefault(); void this.app.workspace.openLinkText(ref.sourceFile.basename, '', false); };
         });
     }
 }
@@ -1084,9 +1079,9 @@ class BrokenRefsModal extends obsidian_1.Modal {
         const { contentEl } = this;
         this.modalEl.addClass('refero-modal-el');
         contentEl.addClass('refero-modal');
-        contentEl.createEl('h2', { text: 'Broken References', cls: 'refero-modal-header' });
+        contentEl.createEl('h2', { text: 'Broken references', cls: 'refero-modal-header' });
         const loadingEl = contentEl.createEl('p', { text: 'Scanning vault…', cls: 'refero-muted' });
-        parseVaultRefs(this.app).then(refs => {
+        void parseVaultRefs(this.app).then(refs => {
             loadingEl.remove();
             const broken = refs.filter(r => r.isBroken);
             if (broken.length === 0) {
@@ -1104,7 +1099,7 @@ class BrokenRefsModal extends obsidian_1.Modal {
                 const detail = item.createDiv({ cls: 'refero-suggestion-path' });
                 detail.createSpan({ text: 'in ' });
                 const nl = detail.createEl('a', { text: ref.sourceFile.basename, href: '#' });
-                nl.onclick = (e) => { e.preventDefault(); this.app.workspace.openLinkText(ref.sourceFile.basename, '', false); this.close(); };
+                nl.onclick = (e) => { e.preventDefault(); void this.app.workspace.openLinkText(ref.sourceFile.basename, '', false); this.close(); };
                 detail.createSpan({ text: ` → missing: ${ref.url}` });
             });
         });

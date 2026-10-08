@@ -7,7 +7,6 @@ import {
   Notice,
   Plugin,
   TFile,
-  WorkspaceLeaf,
 } from 'obsidian';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
@@ -299,7 +298,7 @@ export default class ReferenceAutomatorPlugin extends Plugin {
     this.registerEvent(
       this.app.vault.on('rename', (file, oldPath) => {
         if (!(file instanceof TFile) || !file.path.endsWith('.md')) return;
-        this.handleNoteRename(oldPath, file.path);
+        void this.handleNoteRename(oldPath, file.path);
       })
     );
   }
@@ -307,7 +306,7 @@ export default class ReferenceAutomatorPlugin extends Plugin {
   private async openReferenceMap() {
     const existing = this.app.workspace.getLeavesOfType(VIEW_TYPE_REFERO_MAP);
     if (existing.length > 0) {
-      this.app.workspace.revealLeaf(existing[0]);
+      this.app.workspace.setActiveLeaf(existing[0], { focus: true });
       return;
     }
     await this.app.workspace.getLeaf(true).setViewState({
@@ -322,7 +321,7 @@ export default class ReferenceAutomatorPlugin extends Plugin {
     let   count   = 0;
 
     for (const file of this.app.vault.getMarkdownFiles()) {
-      const content = await this.app.vault.read(file);
+      const content = await this.app.vault.cachedRead(file);
       // wiki-link: ### [[oldBase]] or ### [[oldBase|alias]]
       const wikiRe = new RegExp(
         `(^###[ \\t]+\\[\\[)${escapeRegex(oldBase)}(\\|[^\\]]*)?\\]\\]`,
@@ -333,12 +332,12 @@ export default class ReferenceAutomatorPlugin extends Plugin {
         `(^###[ \\t]+\\[[^\\]]*\\]\\()${escapeRegex(oldPath)}\\)`,
         'gm'
       );
-      const updated = content
+      const rewrite = (text: string) => text
         .replace(wikiRe, (_, pre, alias) => `${pre}${newBase}${alias ?? ''}]]`)
         .replace(mdRe, `$1${newPath})`);
 
-      if (updated !== content) {
-        await this.app.vault.modify(file, updated);
+      if (rewrite(content) !== content) {
+        await this.app.vault.process(file, rewrite);
         count++;
       }
     }
@@ -401,14 +400,10 @@ class ReferenceModal extends Modal {
     typeWrapper.createEl('label', { text: 'Type', cls: 'refero-label' });
     this.typeSelect = typeWrapper.createEl('select', { cls: 'refero-select' });
     TYPE_GROUPS.forEach(group => {
-      const og = document.createElement('optgroup');
-      og.label = group.label;
+      const og = this.typeSelect.createEl('optgroup', { attr: { label: group.label } });
       group.types.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t.key; opt.textContent = `${t.icon} ${t.label}`;
-        og.appendChild(opt);
+        og.createEl('option', { value: t.key, text: `${t.icon} ${t.label}` });
       });
-      this.typeSelect.appendChild(og);
     });
     this.typeSelect.onchange = () => this.onTypeChange();
     this.typeSelect.addEventListener('keydown', (e) => {
@@ -442,9 +437,9 @@ class ReferenceModal extends Modal {
     this.titleSuggestionsContainer = titleWrapper.createDiv('refero-suggestions');
     this.titleInput.oninput  = () => { if (this.typeSelect.value === 'plain-note') this.showTitleSuggestions(); };
     this.titleInput.onfocus  = () => { if (this.typeSelect.value === 'plain-note') this.showTitleSuggestions(); };
-    this.titleInput.onblur   = () => setTimeout(() => this.hideTitleSuggestions(), 200);
+    this.titleInput.onblur   = () => window.setTimeout(() => this.hideTitleSuggestions(), 200);
     this.titleInput.addEventListener('keydown', (e) => {
-      const open = this.titleSuggestionsContainer.style.display !== 'none';
+      const open = this.titleSuggestionsContainer.hasClass('is-open');
       if (e.key === 'ArrowDown' && open) {
         e.preventDefault();
         const items = this.titleSuggestionsContainer.querySelectorAll<HTMLElement>('.refero-suggestion-item');
@@ -535,10 +530,10 @@ class ReferenceModal extends Modal {
     } else {
       this.typeSelect.value = 'plain-note';
       this.onTypeChange();
-      this.tryPrefillFromClipboard();
+      void this.tryPrefillFromClipboard();
     }
 
-    setTimeout(() => (this.editLine != null ? this.titleInput : this.typeSelect).focus(), 50);
+    window.setTimeout(() => (this.editLine != null ? this.titleInput : this.typeSelect).focus(), 50);
 
     this.clickHandler = (e: MouseEvent) => {
       if (!this.urlInput.contains(e.target as Node) && !this.suggestionsContainer.contains(e.target as Node))
@@ -593,7 +588,7 @@ class ReferenceModal extends Modal {
     this.hideSuggestions();
     this.hideTitleSuggestions();
     const isNote = this.typeSelect.value === 'plain-note';
-    this.urlWrapper.style.display = isNote ? 'none' : '';
+    this.urlWrapper.toggleClass('refero-hidden', isNote);
     if (isNote) {
       this.titleInput.placeholder = '📎 Start typing a note name…';
     } else {
@@ -644,7 +639,7 @@ class ReferenceModal extends Modal {
       if (text && /^https?:\/\//.test(text.trim()) && !this.urlInput.value.trim() && !this.titleInput.value.trim()) {
         this.urlInput.value = text.trim();
         this.detectTypeFromUrl();
-        this.urlWrapper.style.display = '';
+        this.urlWrapper.removeClass('refero-hidden');
       }
     } catch { /* clipboard access denied */ }
   }
@@ -725,7 +720,7 @@ class ReferenceModal extends Modal {
 
   private renderSuggestions(files: TFile[], container: HTMLElement) {
     container.empty();
-    if (files.length === 0) { container.style.display = 'none'; return; }
+    if (files.length === 0) { container.removeClass('is-open'); return; }
     files.forEach(file => {
       const item = container.createDiv('refero-suggestion-item');
       item.createDiv({ text: file.basename, cls: 'refero-suggestion-name' });
@@ -733,11 +728,11 @@ class ReferenceModal extends Modal {
       item.onclick = () => {
         this.titleInput.value = file.basename;
         this.urlInput.value   = file.path;
-        container.style.display = 'none';
+        container.removeClass('is-open');
         this.suggestionIndex    = -1;
       };
     });
-    container.style.display = 'block';
+    container.addClass('is-open');
   }
 
   private highlightSuggestion(items: NodeListOf<HTMLElement>) {
@@ -747,8 +742,8 @@ class ReferenceModal extends Modal {
     });
   }
 
-  private hideSuggestions()      { this.suggestionsContainer.style.display = 'none'; }
-  private hideTitleSuggestions() { this.titleSuggestionsContainer.style.display = 'none'; this.suggestionIndex = -1; }
+  private hideSuggestions()      { this.suggestionsContainer.removeClass('is-open'); }
+  private hideTitleSuggestions() { this.titleSuggestionsContainer.removeClass('is-open'); this.suggestionIndex = -1; }
 
   // ── Star rating ───────────────────────────────────────────────────────────
 
@@ -840,7 +835,7 @@ class StatusGuideModal extends Modal {
     const { contentEl } = this;
     this.modalEl.addClass('refero-modal-el');
     contentEl.addClass('refero-modal');
-    contentEl.createEl('h2', { text: 'Reference Statuses', cls: 'refero-modal-header' });
+    contentEl.createEl('h2', { text: 'Reference statuses', cls: 'refero-modal-header' });
     const list = contentEl.createDiv('refero-status-guide-list');
     STATUS_ORDER.forEach(s => {
       const row = list.createDiv('refero-status-guide-row');
@@ -858,10 +853,10 @@ class TagBrowserModal extends Modal {
     const { contentEl } = this;
     this.modalEl.addClass('refero-modal-el');
     contentEl.addClass('refero-modal');
-    contentEl.createEl('h2', { text: 'Browse by Tag', cls: 'refero-modal-header' });
+    contentEl.createEl('h2', { text: 'Browse by tag', cls: 'refero-modal-header' });
     const loadingEl = contentEl.createEl('p', { text: 'Scanning vault…', cls: 'refero-muted' });
 
-    parseVaultRefs(this.app).then(refs => {
+    void parseVaultRefs(this.app).then(refs => {
       loadingEl.remove();
       const tagMap = new Map<string, VaultRef[]>();
       refs.forEach(r => r.tags.forEach(t => {
@@ -894,7 +889,7 @@ class TagBrowserModal extends Modal {
       item.createDiv({ text: ref.title, cls: 'refero-suggestion-name' });
       item.createDiv({ text: ref.sourceFile.path, cls: 'refero-suggestion-path' });
       item.onclick = () => {
-        this.app.workspace.openLinkText(ref.sourceFile.basename, '', false);
+        void this.app.workspace.openLinkText(ref.sourceFile.basename, '', false);
         this.close();
       };
     });
@@ -917,7 +912,7 @@ class RefMapView extends ItemView {
   private listEl!: HTMLElement;
 
   getViewType()    { return VIEW_TYPE_REFERO_MAP; }
-  getDisplayText() { return 'Reference Map'; }
+  getDisplayText() { return 'Reference map'; }
   getIcon()        { return 'layout-list'; }
 
   async onOpen() {
@@ -938,13 +933,13 @@ class RefMapView extends ItemView {
     bar.empty();
 
     const typeSelect = bar.createEl('select', { cls: 'refero-map-select' });
-    typeSelect.createEl('option', { text: 'All Types', value: '' });
+    typeSelect.createEl('option', { text: 'All types', value: '' });
     TYPE_OPTIONS.forEach(t => typeSelect.createEl('option', { text: `${t.icon} ${t.label}`, value: t.key }));
     typeSelect.value    = this.filters.type;
     typeSelect.onchange = () => { this.filters.type = typeSelect.value; this.render(); };
 
     const statusSelect = bar.createEl('select', { cls: 'refero-map-select' });
-    statusSelect.createEl('option', { text: 'All Statuses', value: '' });
+    statusSelect.createEl('option', { text: 'All statuses', value: '' });
     STATUS_ORDER.forEach(s => statusSelect.createEl('option', { text: `${s.icon} ${s.label}`, value: s.key }));
     statusSelect.value    = this.filters.status;
     statusSelect.onchange = () => { this.filters.status = statusSelect.value; this.render(); };
@@ -1065,7 +1060,7 @@ class RefMapView extends ItemView {
         titleEl.createSpan({ text: ' ⚠️ missing', cls: 'refero-broken-badge' });
       } else if (ref.type === 'plain-note' && ref.url) {
         const a = titleEl.createEl('a', { text: ref.title, href: '#' });
-        a.onclick = (e) => { e.preventDefault(); this.app.workspace.openLinkText(ref.title, ref.sourceFile.path, false); };
+        a.onclick = (e) => { e.preventDefault(); void this.app.workspace.openLinkText(ref.title, ref.sourceFile.path, false); };
       } else if (ref.url) {
         const a = titleEl.createEl('a', { text: ref.title, href: ref.url });
         a.onclick = (e) => { e.preventDefault(); window.open(ref.url, '_blank'); };
@@ -1087,7 +1082,7 @@ class RefMapView extends ItemView {
       const sourceEl = card.createDiv('refero-map-card-source');
       sourceEl.createSpan({ text: 'in ' });
       const nl = sourceEl.createEl('a', { text: ref.sourceFile.basename, href: '#' });
-      nl.onclick = (e) => { e.preventDefault(); this.app.workspace.openLinkText(ref.sourceFile.basename, '', false); };
+      nl.onclick = (e) => { e.preventDefault(); void this.app.workspace.openLinkText(ref.sourceFile.basename, '', false); };
     });
   }
 }
@@ -1099,10 +1094,10 @@ class BrokenRefsModal extends Modal {
     const { contentEl } = this;
     this.modalEl.addClass('refero-modal-el');
     contentEl.addClass('refero-modal');
-    contentEl.createEl('h2', { text: 'Broken References', cls: 'refero-modal-header' });
+    contentEl.createEl('h2', { text: 'Broken references', cls: 'refero-modal-header' });
     const loadingEl = contentEl.createEl('p', { text: 'Scanning vault…', cls: 'refero-muted' });
 
-    parseVaultRefs(this.app).then(refs => {
+    void parseVaultRefs(this.app).then(refs => {
       loadingEl.remove();
       const broken = refs.filter(r => r.isBroken);
 
@@ -1123,7 +1118,7 @@ class BrokenRefsModal extends Modal {
         const detail = item.createDiv({ cls: 'refero-suggestion-path' });
         detail.createSpan({ text: 'in ' });
         const nl = detail.createEl('a', { text: ref.sourceFile.basename, href: '#' });
-        nl.onclick = (e) => { e.preventDefault(); this.app.workspace.openLinkText(ref.sourceFile.basename, '', false); this.close(); };
+        nl.onclick = (e) => { e.preventDefault(); void this.app.workspace.openLinkText(ref.sourceFile.basename, '', false); this.close(); };
         detail.createSpan({ text: ` → missing: ${ref.url}` });
       });
     });
