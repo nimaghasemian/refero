@@ -1,44 +1,146 @@
 # Refero
 
-An Obsidian plugin for capturing and organizing references directly inside your notes. Assign a type, status, tags, and star rating to every reference — whether it's an internal note, a web page, a video, a paper, or anything else. Browse and audit references vault-wide from a dedicated map view.
+**Track everything you read, watch, and learn from right inside your Obsidian notes.**
 
-<img width="800" height="450" alt="refero" src="https://github.com/user-attachments/assets/78c4d3f6-d10a-4ff8-a395-af6fb305ba82" />
+Refero turns the links scattered across your vault into a reading list you can manage. Every reference gets a type, a status, tags, and a rating. You can see all of them at once in a vault-wide map.
+
+<img width="800" height="450" alt="Refero: adding a reference and browsing the Reference Map" src="https://github.com/user-attachments/assets/78c4d3f6-d10a-4ff8-a395-af6fb305ba82" />
+
+![Release](https://img.shields.io/github/v/release/nimaghasemian/refero?style=flat-square)
+![License](https://img.shields.io/github/license/nimaghasemian/refero?style=flat-square)
+
+---
+
+## Why Refero?
+
+You save a paper, a YouTube talk, and a GitHub repo, and a month later you can't remember which ones you finished, which ones were worth it, or which note you put them in.
+
+Refero solves this without leaving Obsidian:
+
+- **Capture in seconds.** Copy a URL and run one command. Refero fills in the link from your clipboard and works out whether it's a paper, video, repo, or something else.
+- **Know where you stand.** Move each reference from *Saved* to *In Progress* to *Completed* with a single command. Completion dates are recorded for you.
+- **See the whole picture.** The Reference Map lists every reference in your vault, and you can filter it by type, status, tag, rating, or date.
+- **Your data stays plain Markdown.** References are ordinary lines in your notes. There's no database, no lock-in, and they're readable without the plugin.
+
+## Installation
+
+**[Click here to install Refero in Obsidian](https://obsidian.md/plugins?id=refero)**, then click **Install** and **Enable**.
+
+Or, inside Obsidian, go to *Settings → Community plugins → Browse* and search for **Refero**.
+
+<details>
+<summary>Manual install</summary>
+
+Download `main.js`, `styles.css`, and `manifest.json` from the [latest release](https://github.com/nimaghasemian/refero/releases/latest), put them in `<vault>/.obsidian/plugins/refero/`, and enable **Refero** in *Settings → Community plugins*.
+
+</details>
+
+## How do I use it?
+
+### 1. Set up hotkeys (recommended)
+
+Refero is built to be used from the keyboard. With a hotkey, you can capture a reference in a few seconds without touching the mouse.
+
+Go to *Settings → Hotkeys*, search for **Refero**, and assign keys to the commands you'll use most. For example:
+
+| Command | Example hotkey |
+|---------|----------------|
+| Add reference to note | `Ctrl/Cmd + Shift + R` |
+| Cycle reference status | `Ctrl/Cmd + Shift + S` |
+| Open reference map | `Ctrl/Cmd + Shift + M` |
+
+Pick any keys you like. If a combination is already taken, Obsidian will tell you.
+
+### 2. Capture a reference
+
+1. Copy a URL.
+2. Press your **Add reference** hotkey. The URL and type are already filled in.
+3. Add a title, status, tags, and rating, then press `Enter` to save.
+
+Refero adds a `## References` section to the note (if it doesn't have one yet) and appends:
+
+```markdown
+### [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
+📄 Paper | 🔄 **In Progress** | ★★★★★ | #ml #transformers | 📅 2026-06-08
+```
+
+### 3. Keep it up to date
+
+Put your cursor on a reference and use **Cycle reference status** to move it along, from *Saved* to *In Progress* to *Completed*. **Edit**, **delete**, and **open URL** work the same way on the reference under your cursor.
+
+### 4. Review everything
+
+Open the **Reference map** to see every reference in your vault, then filter by status to find what's still unfinished.
+
+### Keyboard shortcuts in the capture window
+
+Every field in the capture window works with the keyboard:
+
+| Key | Action |
+|-----|--------|
+| `Tab` / `Shift + Tab` | Move between fields |
+| `Enter` | Save the reference (from any field) |
+| `Ctrl/Cmd + Enter` | Save the reference |
+| `↑` / `↓` on **Type** | Change the type |
+| `↑` / `↓` then `Enter` on **Title** | Pick an Obsidian note from the suggestions |
+| `Esc` on **Title** | Close the suggestions |
+| `0`–`5` on **Rating** | Set the rating directly |
+| `←` / `→` on **Rating** | Lower or raise the rating |
+| `Esc` | Close without saving |
+
+> No hotkeys? Every command is also available from the command palette (`Ctrl/Cmd + P`). Type "Refero" to see them all.
 
 ## Features
 
-- **Add references** via a modal with grouped type picker, URL auto-detection, status, tags, and star rating
-- **Edit or delete** any reference under the cursor
-- **Cycle status** through the workflow with a single command
-- **Open URLs** in the browser straight from the command palette
-- **Auto-detect type** from the URL (GitHub → Repository, YouTube → Video, arXiv → Paper, Spotify → Podcast, Reddit/HN → Thread, Kaggle → Dataset, etc.)
-- **Clipboard capture** — the modal reads the clipboard on open and pre-fills the URL field automatically
-- **Autocomplete** for internal Obsidian notes when type is set to *Obsidian Note*
-- **Tags** stored inline on each reference
-- **Dates** auto-stamped on capture; completion date set when status reaches *Completed*
-- **Vault-wide Reference Map** — browse, filter, and sort every reference across all notes
-- **Tag browser** — find all references by tag across the vault
-- **Broken reference detection** — warns on save and lists all dead note links on demand
-- **Auto-rename** — updates references automatically when a note is renamed or moved
+### Capture
+- **Clipboard capture**: the URL field is pre-filled from your clipboard
+- **Type auto-detection**: GitHub → Repository, YouTube → Video, arXiv → Paper, Spotify → Podcast, Reddit/HN → Thread, Kaggle → Dataset, and more
+- **Note autocomplete**: link to other notes in your vault with the *Obsidian Note* type
+- **Automatic dates**: the capture date is stamped on save, and the completion date is added when the status reaches *Completed*
 
-## Reference format
+### Organize
+- **13 reference types**, grouped into Written, Media, Technical, and Other
+- **7 statuses** covering a full reading workflow, with a built-in status guide
+- **Inline tags** and **1–5 star ratings**
+- **Edit, delete, or cycle status** for the reference under your cursor
 
-Each reference is stored as two lines inside a `## References` section:
+### Browse
+- **Reference Map**: a persistent tab showing every reference in the vault, with live filters and sorting
+- **Tag browser**: click a tag to see every matching reference across the vault
+- **Open URL**: open the link under your cursor in the browser from the command palette
 
-```
-### [[Note Name]]
-📎 Obsidian Note | 🔄 **In Progress** | ★★★☆☆ | #ml #attention | 📅 2026-06-08
-```
+### Stay consistent
+- **Auto-rename**: when you rename or move a note, Refero updates every reference that points to it
+- **Broken link warnings**: you're notified when you save a reference to a note that doesn't exist
+- **Find broken references**: scan the whole vault for links to notes that no longer exist
 
-```
-### [Title](https://example.com)
-🌐 Web Page | ✅ **Completed** | ★★★★★ | 📅 2026-01-15 | ✔ 2026-03-20
-```
+## Commands
 
-Tags, dates, and completion date are all optional and only appended when present, so the format is backward-compatible.
+| Command | What it does |
+|---------|--------------|
+| **Add reference to note** | Opens the capture modal with the URL pre-filled from your clipboard |
+| **Edit reference under cursor** | Re-opens the modal with the reference's current values |
+| **Delete reference under cursor** | Removes the reference and its meta line |
+| **Cycle reference status** | Moves to the next status and stamps the completion date at *Completed* |
+| **Open reference URL in browser** | Opens the external link under the cursor |
+| **Browse references by tag** | Opens a tag cloud, and clicking a tag lists its references vault-wide |
+| **Open reference map** | Opens the vault-wide Reference Map in a new tab |
+| **Find broken references** | Lists every note reference that points to a missing file |
 
-## Reference types
 
-Types are grouped in the modal dropdown.
+## Reference Map
+
+The Reference Map collects every reference from every note into one view.
+
+- **Filter** live by type, status, tag (partial match), minimum rating, and date added
+- **Sort** by date added, rating, title, note name, or status, in ascending or descending order
+- **Navigate**: click a title to open its URL or note, or click the source note to jump to it
+- Click **↻ Refresh** to re-scan after editing
+
+## Reference types and statuses
+
+<details>
+<summary><strong>Types (13)</strong></summary>
 
 | Group | Icon | Type |
 |-------|------|------|
@@ -56,55 +158,39 @@ Types are grouped in the modal dropdown.
 | Other | 🌐 | Web Page |
 | Other | 📦 | Other |
 
-## Statuses
+</details>
 
-| Icon | Status |
-|------|--------|
-| 📥 | Saved |
-| 🔍 | Skimmed |
-| 🔄 | In Progress |
-| ⏳ | To Review |
-| ✅ | Completed |
-| ❗ | Needs Review |
-| 🚫 | Abandoned |
+<details>
+<summary><strong>Statuses (7)</strong></summary>
 
-## Commands
+| Icon | Status | Meaning |
+|------|--------|---------|
+| 📥 | Saved | Saved for later, not opened yet |
+| 🔍 | Skimmed | Glanced at, rough sense of the content |
+| 🔄 | In Progress | Actively reading, watching, or working through it |
+| ⏳ | To Review | Finished, but you want to revisit it before calling it done |
+| ✅ | Completed | Fully consumed, and you've extracted what you needed |
+| ❗ | Needs Review | Something needs attention, such as unclear notes or conflicting info |
+| 🚫 | Abandoned | Decided not to continue |
 
-| Command | Description |
-|---------|-------------|
-| **Add Reference to Note** | Opens the capture modal (clipboard URL auto-filled) |
-| **Edit Reference Under Cursor** | Re-opens the modal pre-filled with the reference at the cursor |
-| **Delete Reference Under Cursor** | Removes the reference and its meta line |
-| **Open Reference URL in Browser** | Opens the external URL of the reference at the cursor |
-| **Cycle Reference Status** | Advances the status to the next one; stamps completion date when reaching *Completed* |
-| **Browse References by Tag** | Opens a tag cloud — click a tag to see all matching references vault-wide |
-| **Open Reference Map** | Opens the vault-wide reference map in a new tab |
-| **Find Broken References** | Lists all Obsidian Note references pointing to non-existent files |
+</details>
 
-## Reference Map
+<details>
+<summary><strong>Storage format</strong></summary>
 
-The Reference Map (**Open Reference Map** command) opens a persistent tab that aggregates every reference from every note in the vault.
+Each reference takes two lines under a `## References` heading:
 
-**Filters** — live, no submit required:
-- Type, Status, Tag (partial match), Minimum rating, Date range (added from/to)
+```markdown
+### [[Note Name]]
+📎 Obsidian Note | 🔄 **In Progress** | ★★★☆☆ | #ml #attention | 📅 2026-06-08
 
-**Sort** by Date Added, Rating, Title, Note Name, or Status — with ascending/descending toggle.
+### [Title](https://example.com)
+🌐 Web Page | ✅ **Completed** | ★★★★★ | 📅 2026-01-15 | ✔ 2026-03-20
+```
 
-Each card shows the type icon, linked title, status, star rating, tags, dates, and the source note. Clicking a title opens the URL or navigates to the note; clicking the note name navigates there directly.
+Tags and dates are optional and are only written when present, so older references keep working.
 
-Use **↻ Refresh** to re-scan after making edits.
-
-## Reference integrity
-
-- **Save warning** — if an *Obsidian Note* reference points to a file that doesn't exist, a notice appears immediately after saving.
-- **Find Broken References** — scans the vault and lists every dead note link with its source note (click to navigate).
-- **Auto-rename** — when a note is renamed or moved in Obsidian, Refero automatically updates all `[[wiki-links]]` and `[markdown](links)` in reference lines across the vault and shows a notice with the count of updated notes.
-
-## Installation
-
-1. Download `main.js`, `styles.css`, and `manifest.json` from the latest release.
-2. Copy them into `<vault>/.obsidian/plugins/refero/`.
-3. Enable **Refero** in *Settings → Community Plugins*.
+</details>
 
 ## Development
 
@@ -113,8 +199,8 @@ npm install
 npm run build   # compiles main.ts → main.js
 ```
 
-Requires Node.js and the Obsidian plugin API typings (included via `devDependencies`).
+Bug reports and feature requests are welcome in [Issues](https://github.com/nimaghasemian/refero/issues).
 
 ## License
 
-MIT
+[MIT](LICENSE)
